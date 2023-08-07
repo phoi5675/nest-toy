@@ -18,31 +18,34 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserInfo } from './UserInfo';
 
-@Controller('users')
+@Controller(`users`)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
   async createUser(@Body() dto: CreateUserDto): Promise<void> {
+    const { name, email, password } = dto;
+    await this.usersService.createUser(name, email, password);
     console.log(dto);
   }
 
   @Post(`/email-verify`)
   async verifyEmail(@Query() dto: VerifyEmailDto): Promise<string> {
-    console.log(dto);
-    return;
+    const { signupVerifyToken } = dto;
+
+    return await this.usersService.verifyEmail(signupVerifyToken);
   }
 
   @Post(`/login`)
   async login(@Body() dto: UserLoginDto): Promise<string> {
-    console.log(dto);
-    return;
+    const { email, password } = dto;
+
+    return await this.usersService.login(email, password);
   }
 
   @Get(`/:id`)
   async getUserInfo(@Param(`id`) userId: string): Promise<UserInfo> {
-    console.log(userId);
-    return;
+    return await this.usersService.getUserInfo(userId);
   }
 
   @Get()
@@ -51,8 +54,8 @@ export class UsersController {
     return res.status(200).send(users);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
+  @Get(`:id`)
+  findOne(@Param(`id`) id: string) {
     if (+id < 1) {
       throw new BadRequestException(`id는 0보다 큰 값이어야 합니다.`);
     }
@@ -60,13 +63,13 @@ export class UsersController {
   }
 
   @HttpCode(202)
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  @Patch(`:id`)
+  update(@Param(`id`) id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  @Delete(`:id`)
+  remove(@Param(`id`) id: string) {
     return this.usersService.remove(+id);
   }
 }
